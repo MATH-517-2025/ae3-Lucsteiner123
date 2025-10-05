@@ -1,0 +1,190 @@
+---
+title: "MATH-517: Assignment 3"
+author: "Luc Steiner"
+date: 'today'
+format: pdf
+editor: visual
+---
+
+## Theoretical exercise
+
+#### Exercise:
+
+Recall our basic setup: we are given i.i.d. samples $\left(x_i, y_i\right), i=1, \ldots n$ from the model
+
+$$y_i=m\left(x_i\right)+\epsilon_i, \quad i=1, \ldots n$$
+
+and our goal is to estimate $m$ with some function $\hat{m}$. Assume that each $x_i \in \mathbb{R}$ (i.e., the predictors are 1-dimensional).
+
+The local linear regression estimator at a point $x$ is defined by
+
+$$(\hat\beta_0(x), \hat\beta_1(x)) 
+= \arg\min_{\beta_0,\beta_1 \in \mathbb{R}} 
+\sum_{i=1}^n \Big(Y_i - \beta_0 - \beta_1 (X_i - x)\Big)^2 
+K\left(\frac{X_i - x}{h}\right),$$
+
+where $K$ is a kernel function and $h>0$ is a bandwidth. The fitted value is then given by $\hat m(x) = \hat\beta_0(x)$ and we will show that such estimator belongs to the class of linear smoothers, so that
+
+$$\hat{m}(x)=\sum_{i=1}^n w\left(x, x_i\right) \cdot y_i$$
+
+for some choice of weights $w\left(x, x_i\right)$.
+
+1.  Show that $\hat m(x)$ can be expressed as a weighted average of the observations:
+
+    $$\hat m(x) = \sum_{i=1}^n w_{ni}(x) Y_i,$$
+
+    where the weights $w_{ni}(x)$ depend only on $x$, $\{X_i\}$, $K$, and $h$, but not on the $Y_i$’s.
+
+2.  Using the notation
+
+    $$S_{n,k}(x) = \frac{1}{nh}\sum_{i=1}^n (X_i - x)^k K\left(\frac{X_i - x}{h}\right), \quad k=0,1,2,$$
+
+    derive an explicit expression for $w_{ni}(x)$ in terms of $S_{n,0}(x), S_{n,1}(x), S_{n,2}(x)$, and the kernel.
+
+3.  Prove that the weights satisfy $\sum_{i=1}^n w_{ni}(x) = 1$.
+
+#### Solution:
+
+We start by defining $K_i = K\left( \frac{X_i-x}{h} \right)$ to lighten the notation.
+
+##### Part 1
+
+Notice that
+
+$$(\hat\beta_0(x), \hat\beta_1(x)) 
+= \arg\min_{\beta_0,\beta_1 \in \mathbb{R}} 
+\sum_{i=1}^n \Big(Y_i - \beta_0 - \beta_1 (X_i - x)\Big)^2 
+K_i = \arg\min_{\beta \in \mathbb{R}^2} \left( Y-X\beta\right)^\top W \left(Y-X\beta \right),$$
+
+where
+
+$$
+Y = \begin{pmatrix}
+y_1\\
+\vdots\\
+y_n
+\end{pmatrix}, \quad X = \begin{pmatrix}
+1 & X_1-x\\
+\vdots & \vdots\\
+1 & X_n - x
+\end{pmatrix}, \quad W = \mathrm{diag}\left( K_1, K_2, \ldots, K_n \right).
+$$
+
+Thus the problem becomes a weighted least squares problem, and we know (by slide 13 in lecture 3) that therefore the solution to this problem is
+
+$$
+\hat{\beta} = \left( X^\top WX \right)^{-1}X^\top W Y.
+$$
+
+Furthermore, by slide 12 of lecture 3,
+
+$$
+\hat{m}(x) = \hat{\beta_0}(x).
+$$
+
+And so we can write
+
+$$
+\hat{m}(x) = e_1^\top \left( X^\top WX \right)^{-1}X^\top W Y = \sum_{i=1}^n \left[ e_1^\top \left( X^\top WX \right)^{-1}X^\top W\right]_i Y_i = \sum_{i=1}^n w_{n,i}(x) Y_i,
+$$
+
+where $e_1$ is the first vector of the standard basis of $\mathbb{R}^2$, and $w_{n,i}(x) = \left[ e_1^\top \left( X^\top WX \right)^{-1}X^\top W\right]_i$ only depends on $x$, $X_j$'s, $K$ and $h$, since $X$ and $W$ only depend on said variables and $K$.
+
+##### Part 2
+
+Let $$S_{n,k}(x) = \frac{1}{nh}\sum_{i=1}^n (X_i - x)^k K_i, \quad k=0,1,2,$$ the notation from the exercise. Then,
+
+\begin{align*}
+X^\top W X &= \begin{pmatrix}
+1 & \cdots & 1\\
+X_1-x & \cdots & X_n-x
+\end{pmatrix}
+\begin{pmatrix}
+K_1 & 0 & \cdots & 0\\
+0 & K_2 &\ddots & \vdots\\
+\vdots & \ddots & \ddots & 0\\
+0 & \cdots & 0 & K_n
+\end{pmatrix}
+\begin{pmatrix}
+1 & X_1-x\\
+\vdots & \vdots \\
+1 & X_n-x
+\end{pmatrix} \\
+&= \begin{pmatrix}
+\sum_{i=1}^n K_i & \sum_{i=1}^n K_i (X_i-x)\\
+\sum_{i=1}^n K_i (X_i-x) & \sum_{i=1}^n K_i (X_i-x)^2
+\end{pmatrix} = nh \begin{pmatrix}
+S_{n,0} & S_{n,1}\\
+S_{n,1} & S_{n,2}
+\end{pmatrix}.
+\end{align*}
+
+And so it follows that, $$\det \left( X^\top W X \right) = (nh)^2 (S_{n,0}S_{n,2} - S_{n,1}^2)$$
+
+and so
+
+$$\left( X^\top W X \right)^{-1} = \frac{1}{nh (S_{n,0}S_{n,2} - S_{n,1}^2)} \begin{pmatrix}
+S_{n,2} & -S_{n,1}\\
+-S_{n,1} & S_{n,0}
+\end{pmatrix}.$$
+
+And so we can calculate the explicit expression for the weights:
+
+\begin{align*}
+w_{n,i} &= \left[ \begin{pmatrix}1 & 0 \end{pmatrix} \frac{1}{nh (S_{n,0}S_{n,2} - S_{n,1}^2)} \begin{pmatrix}
+S_{n,2} & -S_{n,1}\\
+-S_{n,1} & S_{n,0} 
+\end{pmatrix} 
+\begin{pmatrix}
+1 & \cdots & 1\\
+X_1-x & \cdots & X_n-x
+\end{pmatrix} 
+\mathrm{diag} (K_1, \ldots, K_n) \right] _i\\
+&= \frac{1}{nh (S_{n,0}S_{n,2} - S_{n,1}^2)} K_i S_{n,2} - K_i(X_i-x)S_{n,1}\\
+&= \frac{K_i}{nh (S_{n,0}S_{n,2} - S_{n,1}^2)} \left( S_{n,2} - (X_i-x)S_{n,1} \right),
+\end{align*}
+
+which proves part 2.
+
+##### Part 3
+
+We sum the formula we found in part 2 over $i$ and we find,
+
+\begin{align*}
+\sum_{i=1}^n w_{n,i} &= \sum_{i=1}^n \frac{K_i}{nh (S_{n,0}S_{n,2} - S_{n,1}^2)} \left( S_{n,2} - (X_i-x)S_{n,1} \right)\\
+&= \frac{1}{nh (S_{n,0}S_{n,2} - S_{n,1}^2)} \left( \sum_{i=1}^n K_i S_{n,2} - \sum_{i=1}^n K_i (X_i-x) S_{n,1} \right) \\
+&= \frac{1}{nh (S_{n,0}S_{n,2} - S_{n,1}^2)} \left( nh S_{n,0} S_{n,2} - nh S_{n,1} S_{n,1} \right)\\
+&= 1,
+\end{align*}c
+
+by using the definition of $S_{n,k}$. This was the desired result and therefore concludes the theoretical part.
+
+## Practical exercise
+
+In this simulation study we want to assess the impact of different parameters on the estimation of $h_{AMISE}$.
+
+The results of my simulation study are concisely visualized in the Shiny App contained in the `global_bandwidth.R` file, all of the following comments make reference to the visualizations in said Shiny App. To open the Shiny app, just open the file and click on Run App. The app might take some time to start up, just wait until the plots pop up. I decided to start by showing the estimated values for $\hat{\theta}_{22}$, $\hat{\sigma}^2$ and $h_{AMISE}$ for the number of blocks, $N$, specified in the slider selection on the left. Note that the number of blocks chosen in the slider has no impact on the figures. As my first figure I decided to show the distribution of the simulated data, along with the curve of the true regression function, $m(x)$. The second figure depicts a histogram showing distribution of the observations along the support of $\mathrm{Beta}(\alpha, \beta)$, i.e. $[0,1]$.
+
+Note that the blocking is performed by enumerating the observations and then splitting them into blocks of roughly equal size. This means that the blocking is random of some sort. I also tried a different way, where we split up the support of $X$ and then assign observation to the blocks containing it. This leads to very uneven numbers of observations in along the blocks, but this also leads to smaller estimates for $h_{AMISE}$. I decided to use the enumerating and splitting into blocks of roughly the same size, to always have enough observations in each block to fit a polynomial of degree $4$, as long as $N\leq \frac{n}{5}$. Like this we don't get any problems in the estimation when tuning the $\alpha$ and $\beta$ parameters of the $\mathrm{Beta}(\alpha, \beta)$ distribution.
+
+The third figure shows a heat map, where the axis are the values of $\alpha$ and $\beta$ in the $\mathrm{Beta}(\alpha, \beta)$ distribution, and the intensity shows the estimated value for $h_{AMISE}$. The number of blocks used for this plot is the optimal number of blocks in each cell, i.e. the optimal number of blocks for each combination of $\alpha$ and $\beta$. We can see that there seems to be a trend in the $h_{AMISE}$ values, it grows as $\beta$ decreases and $\alpha$ increases. However, note that this trend is less visible for small sample sizes, e.g. $n=200$. The trend most likely follows from the fact that increasing $\alpha$ and decreasing $\beta$ leads to an increased number of observations in the small values. And therefore the estimated value of $\hat{\theta}_{22}$ increases, which leads to an increase in $h_{AMISE}$. The increase in $\hat{\theta}_{22}$ is due to the density function changing. The density function puts more weight on the observations with small values, and therefore, the weight of the curvature (second derivative) of $m$ for small values increases. And so since the curvature of $m$ is higher for low values than it is for high values (can for example be seen by looking at the first figure in the app), the integral of the squared curvature times the density function increases in value as the density function shifts towards smaller values.
+
+The fourth figure on the app shows the evolution of $h_{AMISE}$ as we increase the sample size, $n$, while choosing an optimal value for the number of blocks, $N$. We can see that for $\alpha \approx \beta$ we get decreasing values for $h_{AMISE}$ as $n$ increases. However, the trend is not as clear for all combinations of $\alpha$ and $\beta$, e.g. if we consider $\alpha = 4.5$ and $\beta = 1$ we get a very wiggly curve without a clear trend.\
+As long as $\alpha \approx \beta$ the observations are symmetrically distributed around $0.5$, I believe that the ratio of the dependence on $n$ of $\hat{\theta}_{22}$ and $\hat{\sigma}^2$ is somewhat constant in this case. So that the $\frac{1}{n^{1/5}}$ factor leads to a decrease of $h_{AMISE}$ when increasing $n$.
+
+The last figure in the app shows how $h_{AMISE}$ evolves as we modify the number of blocks, $N$, for the estimation. There is a trend, that $h_{AMISE}$ decreases when augmenting the number of blocks. But once again, for some combinations of the parameters this decrease is not monotone, for example for $\alpha = 0.5$, $\beta=0.5$ and $n=3000$. On the one hand increasing $N$ decreases the factor $\frac{1}{n-5N}$ on the other hand, the RSS per block decreases aswell, since we get a better local fit, and are capable of better capturing the local curvature. This works, since the block sizes are still relatively large so we do not have problems of overfitting. This effect seems to be larger than the one $N$ has on $\hat{\theta}_{22}$, thus we get a decreasing $h_{AMISE}$ as $N$ increases.
+
+I also tried to plot the optimal $N$ values in terms of the sample size, but this didn't yield any simple relationship between $n$ and $N$. $N$ should be chosen to be small enough to get a good fit in the blocks, but otherwise does not really depend on $n$. It's more important how the data is structured/distributed than how many observations we have.
+
+Finally, to address the last question, the $\alpha$ parameter leads to higher density in low values when augmented, while $\beta$ leads to higher density in high values. When both are chosen to be smaller than $1$ we get a lot of density in the extreme values, but almost no values in the center. When both parameters are equal to one, the Beta distribution is the same as a uniform distribution on $[0,1]$. Most of what I discussed above already includes how the results change according to the Beta-distribution parameters. The most important aspect probably being that if we have higher density in the region, where $m$ has a higher curvature, we get higher estimates for $h_{AMISE}$.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Your code goes here. 
+# The `echo: false` option disables the printing of code (only output is displayed).
+# The programming language can be changed to Python or Julia
+
+```
